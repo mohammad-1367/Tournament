@@ -1,70 +1,155 @@
-<script>
-  const originalNames = ['صالح', 'ناصر', 'حمید', 'مجید', 'محمد', 'امین', 'فرزاد', 'حسین'];
-
-  const matchMap = {
-    'm1a': 'q1',
-    'm1b': 'q1',
-    'm2a': 'q2',
-    'm2b': 'q2',
-    'm3a': 'q3',
-    'm3b': 'q3',
-    'm4a': 'q4',
-    'm4b': 'q4',
-    'q1': 's1',
-    'q2': 's1',
-    'q3': 's2',
-    'q4': 's2',
-    's1': 'final',
-    's2': 'final'
-  };
-
-  function shuffle(array) {
-    let result = [...array];
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [result[i], result[j]] = [result[j], result[i]];
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>نمودار حذفی</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      direction: rtl;
+      background: #f0f0f0;
+      text-align: center;
+      padding: 20px;
     }
-    return result;
-  }
 
-  function fillInitialMatches() {
-    const shuffledNames = shuffle(originalNames);
-    const ids = ['m1a', 'm1b', 'm2a', 'm2b', 'm3a', 'm3b', 'm4a', 'm4b'];
-    ids.forEach((id, index) => {
-      const el = document.getElementById(id);
-      el.textContent = shuffledNames[index];
-      el.classList.remove('winner');
-    });
-  }
+    .bracket {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 30px;
+    }
 
-  function reset() {
-    // پاک کردن مراحل بعدی
-    document.querySelectorAll(".match").forEach(el => {
-      if (!el.id.startsWith('m')) {
-        el.textContent = "";
-        el.classList.remove("winner");
+    .column {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+    }
+
+    .stage-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .match {
+      background: white;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 10px 20px;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+
+    .winner {
+      background: #c8e6c9;
+      border-color: #2e7d32;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>جام حذفی</h2>
+
+  <div class="bracket">
+    <div class="column">
+      <div class="stage-title">۱/۸ نهایی</div>
+      <div class="match" id="m1a"></div>
+      <div class="match" id="m1b"></div>
+      <div class="match" id="m2a"></div>
+      <div class="match" id="m2b"></div>
+      <div class="match" id="m3a"></div>
+      <div class="match" id="m3b"></div>
+      <div class="match" id="m4a"></div>
+      <div class="match" id="m4b"></div>
+    </div>
+    <div class="column">
+      <div class="stage-title">۱/۴ نهایی</div>
+      <div class="match" id="q1"></div>
+      <div class="match" id="q2"></div>
+      <div class="match" id="q3"></div>
+      <div class="match" id="q4"></div>
+    </div>
+    <div class="column">
+      <div class="stage-title">نیمه نهایی</div>
+      <div class="match" id="semi1"></div>
+      <div class="match" id="semi2"></div>
+    </div>
+    <div class="column">
+      <div class="stage-title">فینال</div>
+      <div class="match" id="final"></div>
+    </div>
+    <div class="column">
+      <div class="stage-title">قهرمان</div>
+      <div class="match" id="champion"></div>
+    </div>
+  </div>
+
+  <button onclick="resetTournament()">ریست</button>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const allPlayers = ['صالح', 'ناصر', 'حمید', 'مجید', 'محمد', 'امین', 'فرزاد', 'حسین'];
+
+      const matchMap = {
+        'm1a': 'q1',
+        'm1b': 'q1',
+        'm2a': 'q2',
+        'm2b': 'q2',
+        'm3a': 'q3',
+        'm3b': 'q3',
+        'm4a': 'q4',
+        'm4b': 'q4',
+        'q1': 'semi1',
+        'q2': 'semi1',
+        'q3': 'semi2',
+        'q4': 'semi2',
+        'semi1': 'final',
+        'semi2': 'final',
+        'final': 'champion'
+      };
+
+      function shuffle(array) {
+        let shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
       }
+
+      function resetTournament() {
+        document.querySelectorAll('.match').forEach(m => {
+          if (!m.id.startsWith('m')) {
+            m.textContent = '';
+            m.classList.remove('winner');
+          }
+        });
+
+        const shuffled = shuffle(allPlayers);
+        const mIds = ['m1a', 'm1b', 'm2a', 'm2b', 'm3a', 'm3b', 'm4a', 'm4b'];
+        mIds.forEach((id, index) => {
+          document.getElementById(id).textContent = shuffled[index];
+        });
+      }
+
+      function handleClick(e) {
+        const current = e.target;
+        const nextId = matchMap[current.id];
+        if (!nextId) return;
+
+        const next = document.getElementById(nextId);
+        if (!next) return;
+
+        next.textContent = current.textContent;
+        next.classList.add('winner');
+      }
+
+      document.querySelectorAll('.match').forEach(m => {
+        m.addEventListener('click', handleClick);
+      });
+
+      resetTournament(); // بار اول
     });
+  </script>
 
-    // پر کردن رندوم مرحله اول
-    fillInitialMatches();
-  }
-
-  function handleClick(e) {
-    const current = e.target;
-    const nextId = matchMap[current.id];
-    if (!nextId) return;
-
-    const next = document.getElementById(nextId);
-    if (next && !next.textContent) {
-      next.textContent = current.textContent;
-      next.classList.add("winner");
-    }
-  }
-
-  document.querySelectorAll(".match").forEach(el => {
-    el.addEventListener("click", handleClick);
-  });
-
-  window.addEventListener('load', fillInitialMatches);
-</script>
+</body>
+</html>
